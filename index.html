@@ -11,19 +11,19 @@
     <style>
         @font-face {
             font-family: 'Al Mushaf';
-            src: url('fonts/al-mushaf-arabic-font.ttf') format('truetype');
+            src: url('./fonts/al-mushaf-arabic-font.ttf') format('truetype'); /* Updated path */
             font-weight: normal;
             font-style: normal;
         }
         @font-face {
             font-family: 'MUHAMMADI Quranic';
-            src: url('fonts/1 MUHAMMADI QURANIC.ttf') format('truetype');
+            src: url('./fonts/1 MUHAMMADI QURANIC.ttf') format('truetype'); /* Updated path */
             font-weight: normal;
             font-style: normal;
         }
         @font-face {
             font-family: 'Trad Arabic Bold Unicode';
-            src: url('fonts/Trad Arabic Bold Unicode.ttf') format('truetype');
+            src: url('./fonts/Trad Arabic Bold Unicode.ttf') format('truetype'); /* Updated path */
             font-weight: normal;
             font-style: normal;
         }
@@ -53,11 +53,11 @@
             margin-bottom: 10px;
         }
         input[type="number"] {
-            width: calc(100% - 22px); /* Adjust width for padding */
+            width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 10px;
             font-size: 18px;
-            box-sizing: border-box; /* Include padding in width calculation */
+            box-sizing: border-box;
         }
         button {
             padding: 10px 20px;
@@ -69,7 +69,7 @@
             display: block;
             margin: 5px 0;
             font-size: 16px;
-            text-align: right; /* Right align labels */
+            text-align: right;
         }
 
         #output {
@@ -120,25 +120,24 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            /* white-space and word-break are controlled by inline style for flexibility */
-            display: flex; /* Use flexbox to arrange main and ref texts vertically */
+            display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center; /* Center horizontally within textOutput */
+            align-items: center;
         }
 
         #mainTextOutput, #refTextOutput {
             white-space: pre-wrap;
             word-break: break-word;
-            padding: 5px 0; /* Some padding between main and ref text */
+            padding: 5px 0;
         }
 
         #mainTextOutput {
-            font-size: 40px; /* Default size, will be overwritten by JS */
+            font-size: 40px;
         }
 
         #refTextOutput {
-            font-size: 20px; /* Default size, will be overwritten by JS */
+            font-size: 20px;
         }
 
         .with-overlay {
@@ -408,12 +407,11 @@
         outputDiv.addEventListener("touchmove", drag);
 
         function dragStart(e) {
-            // Allow dragging only if the target is mainTextOutput, refTextOutput, or textOutput itself
             if (e.target !== mainTextOutput && e.target !== refTextOutput && e.target !== textOutput) {
                 return;
             }
 
-            e.preventDefault(); // Prevent default browser drag behavior
+            e.preventDefault();
 
             if (e.type === "touchstart") {
                 initialX = e.touches[0].clientX - xOffset;
@@ -431,8 +429,7 @@
             if (!isDragging) return;
             isDragging = false;
             textOutput.style.cursor = 'grab';
-            // Update initialX/Y to current position for next drag
-            initialX = xOffset; // Use xOffset and yOffset directly as they hold the current position
+            initialX = xOffset;
             initialY = yOffset;
         }
 
@@ -449,7 +446,6 @@
                 clientY = e.clientY;
             }
 
-            // Calculate new position based on initial click point and current mouse/touch position
             currentX = clientX - initialX;
             currentY = clientY - initialY;
 
