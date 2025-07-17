@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اردو آیت امیج جنریٹر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jameel+Noori+Nastaleeq&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic&display=swap" rel="stylesheet">
+
+    <style>
+        @font-face {
+            font-family: 'Al Mushaf';
+            src: url('fonts/al-mushaf-arabic-font.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'MUHAMMADI Quranic';
+            src: url('fonts/1 MUHAMMADI QURANIC.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Trad Arabic Bold Unicode';
+            src: url('fonts/Trad Arabic Bold Unicode.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+        }
+        textarea, input[type="file"], input[type="text"], select {
+            width: 100%;
+            font-size: 18px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+        input[type="number"] {
+            width: calc(100% - 22px); /* Adjust width for padding */
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        label {
+            display: block;
+            margin: 5px 0;
+            font-size: 16px;
+            text-align: right; /* Right align labels */
+        }
+
+        #output {
+            position: relative;
+            width: 100%;
+            min-height: 400px;
+            color: #fff;
+            padding: 50px 20px 80px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #aaa;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #bgLayer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        #textOutput {
+            position: absolute;
+            z-index: 2;
+            padding: 20px 30px;
+            line-height: 1.8;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            border-radius: 20px;
+            cursor: grab;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* white-space and word-break are controlled by inline style for flexibility */
+            display: flex; /* Use flexbox to arrange main and ref texts vertically */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; /* Center horizontally within textOutput */
+        }
+
+        #mainTextOutput, #refTextOutput {
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 5px 0; /* Some padding between main and ref text */
+        }
+
+        #mainTextOutput {
+            font-size: 40px; /* Default size, will be overwritten by JS */
+        }
+
+        #refTextOutput {
+            font-size: 20px; /* Default size, will be overwritten by JS */
+        }
+
+        .with-overlay {
+            background: radial-gradient(circle, rgba(0,0,0,var(--overlay-opacity, 0.4)) 0%, rgba(0,0,0,0) 80%);
+        }
+
+        .footer-bar {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 15px;
+            box-sizing: border-box;
+            font-family: sans-serif;
+            z-index: 2;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            direction: ltr;
+        }
+
+        .footer-item svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        .hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>مرکزی متن (آیت/حدیث) درج کریں:</h2>
+        <textarea id="mainText" rows="4" placeholder="یہاں مرکزی آیت یا حدیث لکھیں..."></textarea>
+        <label for="mainTextSize">مرکزی متن کا سائز (px):</label>
+        <input type="number" id="mainTextSize" value="40" min="10" max="100">
+
+        <h2>حوالہ یا اضافی متن درج کریں:</h2>
+        <textarea id="refText" rows="2" placeholder="یہاں حوالہ یا اضافی متن لکھیں..."></textarea>
+        <label for="refTextSize">حوالہ متن کا سائز (px):</label>
+        <input type="number" id="refTextSize" value="20" min="10" max="100">
+
+        <label>ٹیکسٹ کا رنگ منتخب کریں:</label>
+        <input type="color" id="textColor" value="#ffffff">
+
+        <label>اردو/عربی فونٹ منتخب کریں:</label>
+        <select id="fontSelector" onchange="updateFont()">
+            <option value="'Noto Nastaliq Urdu', serif">Noto Nastaliq Urdu (اردو)</option>
+            <option value="'Jameel Noori Nastaleeq', serif">Jameel Noori Nastaleeq (اردو)</option>
+            <option value="'Amiri Quran', serif">Amiri Quran (عربی - قرآنی)</option>
+            <option value="'Noto Naskh Arabic', serif">Noto Naskh Arabic (عربی)</option>
+            <option value="'Al Mushaf', serif">Al Mushaf (عربی - کسٹم)</option>
+            <option value="'MUHAMMADI Quranic', serif">MUHAMMADI Quranic (عربی - کسٹم)</option>
+            <option value="'Trad Arabic Bold Unicode', serif">Trad Arabic Bold Unicode (عربی - کسٹم)</option>
+        </select>
+
+        <label><input type="checkbox" id="footerToggle" checked> نیچے لنکس دکھائیں</label>
+        <input type="text" id="fbLink" value="fb.com/SheikhMohsinAliNajafi">
+        <input type="text" id="webLink" value="www.mohsinalinajafi.com">
+
+        <label><input type="checkbox" id="blurToggle" checked> پس منظر Blur ہو</label>
+        <label>پس منظر Blur کی شدت:</label>
+        <select id="blurLevel">
+            <option value="2px">25%</option>
+            <option value="4px" selected>50%</option>
+            <option value="6px">75%</option>
+            <option value="8px">100%</option>
+        </select>
+
+        <label><input type="checkbox" id="overlayToggle" checked> ٹیکسٹ کے پیچھے اوورلے ہو</label>
+        <label>اوورلے کی شدت:</label>
+        <select id="overlayOpacity">
+            <option value="0.25">25%</option>
+            <option value="0.5" selected>50%</option>
+            <option value="0.75">75%</option>
+            <option value="1">100%</option>
+        </select>
+
+        <h3>پس منظر تصویر اپلوڈ کریں:</h3>
+        <input type="file" id="imageInput" accept="image/*">
+
+        <button onclick="generateImage()">Generate Image</button>
+        <button onclick="downloadImage()">Download Image</button>
+
+        <div id="outputWrapper" style="margin-top:20px;">
+            <div id="output">
+                <div id="bgLayer"></div>
+                <div id="overlay"></div>
+                <div id="textOutput" class="with-overlay">
+                    <span id="mainTextOutput">...</span>
+                    <span id="refTextOutput">...</span>
+                </div>
+                <div class="footer-bar" id="footerBar">
+                    <div class="footer-item" id="fbArea">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M279.14 288l14.22-92.66h-88.91V127.77c0-25.35 12.42-50.06 52.24-50.06H293V6.26S259.5 0 225.36 0c-73.14 0-121.08 44.38-121.08 124.72V195.3H22.89V288h81.39v224h100.17V288z"/></svg>
+                        <span>fb.com/SheikhMohsinAliNajafi</span>
+                    </div>
+                    <div class="footer-item" id="webArea">
+                        <span>🌐</span>
+                        <span>www.mohsinalinajafi.com</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mainTextInput = document.getElementById('mainText');
+        const mainTextSizeInput = document.getElementById('mainTextSize');
+        const refTextInput = document.getElementById('refText');
+        const refTextSizeInput = document.getElementById('refTextSize');
+        const textColorInput = document.getElementById('textColor');
+        const imageInput = document.getElementById('imageInput');
+        const outputDiv = document.getElementById('output');
+        const bgLayer = document.getElementById('bgLayer');
+        const textOutput = document.getElementById('textOutput');
+        const mainTextOutput = document.getElementById('mainTextOutput');
+        const refTextOutput = document.getElementById('refTextOutput');
+        const footerToggle = document.getElementById('footerToggle');
+        const fbLinkInput = document.getElementById('fbLink');
+        const webLinkInput = document.getElementById('webLink');
+        const footerBar = document.getElementById('footerBar');
+        const fbArea = document.getElementById('fbArea');
+        const webArea = document.getElementById('webArea');
+        const blurToggle = document.getElementById('blurToggle');
+        const blurLevel = document.getElementById('blurLevel');
+        const overlayToggle = document.getElementById('overlayToggle');
+        const overlayOpacity = document.getElementById('overlayOpacity');
+        const fontSelector = document.getElementById('fontSelector');
+
+        // Initial update of text and colors
+        mainTextOutput.innerText = mainTextInput.value || "...";
+        refTextOutput.innerText = refTextInput.value || "";
+        mainTextOutput.style.color = textColorInput.value;
+        refTextOutput.style.color = textColorInput.value;
+        mainTextOutput.style.fontSize = `${mainTextSizeInput.value}px`;
+        refTextOutput.style.fontSize = `${refTextSizeInput.value}px`;
+
+
+        mainTextInput.addEventListener('input', () => {
+            mainTextOutput.innerText = mainTextInput.value;
+        });
+
+        refTextInput.addEventListener('input', () => {
+            refTextOutput.innerText = refTextInput.value;
+        });
+
+        mainTextSizeInput.addEventListener('input', () => {
+            mainTextOutput.style.fontSize = `${mainTextSizeInput.value}px`;
+        });
+
+        refTextSizeInput.addEventListener('input', () => {
+            refTextOutput.style.fontSize = `${refTextSizeInput.value}px`;
+        });
+
+        textColorInput.addEventListener('input', () => {
+            mainTextOutput.style.color = textColorInput.value;
+            refTextOutput.style.color = textColorInput.value;
+        });
+
+        imageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    bgLayer.style.backgroundImage = `url('${e.target.result}')`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        footerToggle.addEventListener('change', () => {
+            footerBar.classList.toggle('hide', !footerToggle.checked);
+        });
+
+        fbLinkInput.addEventListener('input', () => {
+            fbArea.querySelector('span').innerText = fbLinkInput.value;
+        });
+
+        webLinkInput.addEventListener('input', () => {
+            webArea.querySelector('span:last-child').innerText = webLinkInput.value;
+        });
+
+        blurToggle.addEventListener('change', () => {
+            bgLayer.style.filter = blurToggle.checked ? `blur(${blurLevel.value})` : 'none';
+        });
+
+        blurLevel.addEventListener('change', () => {
+            if (blurToggle.checked) {
+                bgLayer.style.filter = `blur(${blurLevel.value})`;
+            }
+        });
+
+        overlayToggle.addEventListener('change', () => {
+            textOutput.classList.toggle('with-overlay', overlayToggle.checked);
+            textOutput.style.setProperty('--overlay-opacity', overlayToggle.checked ? overlayOpacity.value : '0');
+        });
+
+        overlayOpacity.addEventListener('change', () => {
+            if (overlayToggle.checked) {
+                textOutput.style.setProperty('--overlay-opacity', overlayOpacity.value);
+            }
+        });
+
+        function updateFont() {
+            const selectedFont = fontSelector.value;
+            mainTextOutput.style.fontFamily = selectedFont;
+            refTextOutput.style.fontFamily = selectedFont;
+        }
+
+        function generateImage() {
+            updateFont();
+            setTimeout(() => {
+                const footerWasHidden = footerBar.classList.contains('hide');
+                if (!footerToggle.checked) {
+                    footerBar.classList.add('hide');
+                }
+
+                html2canvas(outputDiv, {
+                    useCORS: true,
+                    scale: 2
+                }).then(canvas => {
+                    const imgUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = imgUrl;
+                    link.download = 'urdu-ayat-image.png';
+                    link.click();
+
+                    if (footerWasHidden) {
+                        footerBar.classList.remove('hide');
+                    }
+                });
+            }, 100);
+        }
+
+        function downloadImage() {
+            generateImage();
+        }
+
+        // --- Drag and Move Functionality ---
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        textOutput.addEventListener("mousedown", dragStart);
+        outputDiv.addEventListener("mouseup", dragEnd);
+        outputDiv.addEventListener("mousemove", drag);
+
+        // For touch devices
+        textOutput.addEventListener("touchstart", dragStart);
+        outputDiv.addEventListener("touchend", dragEnd);
+        outputDiv.addEventListener("touchmove", drag);
+
+        function dragStart(e) {
+            // Allow dragging only if the target is mainTextOutput, refTextOutput, or textOutput itself
+            if (e.target !== mainTextOutput && e.target !== refTextOutput && e.target !== textOutput) {
+                return;
+            }
+
+            e.preventDefault(); // Prevent default browser drag behavior
+
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+
+            isDragging = true;
+            textOutput.style.cursor = 'grabbing';
+        }
+
+        function dragEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            textOutput.style.cursor = 'grab';
+            // Update initialX/Y to current position for next drag
+            initialX = xOffset; // Use xOffset and yOffset directly as they hold the current position
+            initialY = yOffset;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            let clientX, clientY;
+            if (e.type === "touchmove") {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            // Calculate new position based on initial click point and current mouse/touch position
+            currentX = clientX - initialX;
+            currentY = clientY - initialY;
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, textOutput);
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+        }
+
+        // Initial call to set default font and sizes
+        updateFont();
+    </script>
+</body>
+</html>
